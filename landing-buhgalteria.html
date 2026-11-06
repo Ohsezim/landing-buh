@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Автоматизация бухгалтерии с ИИ-агентом | Moriz</title>
+<meta name="description" content="Moriz показывает статус по каждому клиенту бухгалтерской фирмы: чьи документы зависли, кому не ответили и кто из бухгалтеров перегружен. Без переезда с 1С и amoCRM.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#FAF8F4;--surface:#fff;--soft:#F3F0EC;--fg:#1A1612;--muted:#6F6660;--line:#ECE5DE;
+  --accent:#FF3B30;--accent-ink:#fff;--accent-soft:#FFEDEA;--good:#1F7A43;--good-soft:#E6F4EA;--wait:#8A5A00;--wait-soft:#FFF3D6;--focus:#1f6feb;
+  --font:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:16px;line-height:1.55}
+img{max-width:100%}
+p{margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:max(16px,env(safe-area-inset-left,0px))}
+section{padding-block:72px;border-top:1px solid var(--line)}
+h1,h2,h3{margin:0;font-family:var(--font);letter-spacing:-.02em;text-wrap:balance}
+h2{font-size:clamp(26px,3.4vw,38px);line-height:1.12;font-weight:800}
+h3{font-size:clamp(21px,2.4vw,26px);line-height:1.2;font-weight:800}
+.acc{color:var(--accent)}
+.lead{color:var(--muted);font-size:18px;max-width:64ch}
+.caption{font-size:13px;color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:16px}
+.center{text-align:center;align-items:center}
+.btn{display:inline-block;border:0;border-radius:999px;padding:14px 24px;font:700 15px var(--font);cursor:pointer;text-decoration:none}
+.btn-main{background:var(--accent);color:var(--accent-ink);box-shadow:0 8px 24px -10px var(--accent)}
+.link-cta{display:inline-flex;gap:6px;align-self:flex-start;margin-top:18px;color:var(--accent);font-weight:700;font-size:16px;text-decoration:none}
+.link-cta:hover{text-decoration:underline;text-underline-offset:4px}
+.feat-cta{border-top:1px solid var(--line);padding-top:28px}
+.cmp-cta{margin-top:28px}
+.cmp-cta .link-cta{margin-top:0}
+.mid-cta{margin-top:32px;gap:10px}
+.btn:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+.banner{background:var(--fg);color:var(--bg);font-size:13px;text-align:center;padding-block:8px}
+nav{position:sticky;top:0;z-index:5;padding-block:14px}
+.navbar{display:flex;align-items:center;gap:20px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:8px 8px 8px 18px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;color:inherit;text-decoration:none}
+.logo i{width:22px;height:22px;border-radius:50%;background:var(--accent)}
+.navlinks{display:flex;gap:18px;flex:1;font-size:14px}
+.navlinks a{color:var(--muted);text-decoration:none;white-space:nowrap}
+.navbar .btn{padding:10px 18px;font-size:14px;white-space:nowrap}
+
+.hero{border-top:0;padding-block:40px 64px;background:radial-gradient(60% 50% at 50% 0%,var(--accent-soft),transparent 70%)}
+.hero h1{font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.display{font-size:clamp(38px,6.2vw,68px);line-height:1.04;font-weight:800;letter-spacing:-.02em;text-wrap:balance;max-width:18ch}
+
+.mock{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;text-align:left;box-shadow:0 30px 60px -40px rgba(60,20,10,.35);min-width:0}
+.hero .mock{width:100%;margin-top:24px;padding:20px}
+.mock-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.mock-title{font-weight:800;font-size:18px}
+.demo{font-size:11px;font-weight:700;color:var(--muted);background:var(--soft);padding:3px 9px;border-radius:999px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.tile{background:var(--soft);border-radius:12px;padding:12px 14px}
+.tile b{display:block;font-size:26px;line-height:1.15;font-variant-numeric:tabular-nums}
+.tile span{font-size:13px;color:var(--muted)}
+.client{display:grid;grid-template-columns:1.1fr 1.7fr auto;gap:14px;align-items:center;padding:11px 2px;border-top:1px solid var(--line);font-size:14px}
+.client b{font-weight:700}
+.client span{color:var(--muted)}
+.chip{justify-self:start;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.chip.red{background:var(--accent-soft);color:#C4231A}
+.chip.wait{background:var(--wait-soft);color:var(--wait)}
+.chip.ok{background:var(--good-soft);color:var(--good)}
+
+.feature{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;padding-block:44px;border-top:1px solid var(--line)}
+.feature:first-of-type{border-top:0;margin-top:12px}
+.feature:nth-of-type(even) .copy{order:2}
+.copy{display:flex;flex-direction:column;gap:12px}
+.copy p{color:var(--muted);font-size:17px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.col{background:var(--soft);border-radius:12px;padding:12px;font-size:13px;display:flex;flex-direction:column;gap:6px}
+.col strong{font-size:13px}
+.col span{color:var(--muted)}
+.draft-msg{margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:13px}
+.draft-msg .row-end{display:flex;justify-content:flex-end;margin-top:8px}
+.fake-btn{background:var(--fg);color:var(--bg);font-weight:700;border-radius:999px;padding:6px 14px;font-size:12px}
+.fact{display:flex;flex-direction:column;gap:3px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.fact:first-of-type{border-top:0}
+.fact small{font-size:12px;color:var(--muted)}
+.bar-row{display:grid;grid-template-columns:96px 1fr auto;gap:10px;align-items:center;font-size:13px;padding:7px 0}
+.bar{height:10px;background:var(--soft);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--fg);border-radius:999px}
+.bar i.hot{background:var(--accent)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.tinted{background:var(--soft)}
+.seg{display:inline-flex;align-self:flex-start;background:var(--soft);border-radius:999px;padding:4px;gap:4px}
+.seg button{border:0;background:transparent;border-radius:999px;padding:8px 16px;font:600 14px var(--font);color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg)}
+.seg button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.week{margin-top:24px;display:flex;flex-direction:column;gap:8px}
+.row{display:grid;grid-template-columns:1fr 1.2fr;gap:16px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 18px}
+.row span{color:var(--muted)}
+.week.moriz .row span{color:var(--fg);font-weight:600}
+.card{display:flex;flex-direction:column;gap:6px;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card p{color:var(--muted)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:28px}
+.steps span{font-size:14px;color:var(--muted)}
+.steps .n{font-size:16px;font-weight:800;color:var(--accent)}
+.steps .who{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.steps .human{background:var(--fg);border-color:var(--fg)}
+.steps .human span{color:var(--bg)}
+.steps .human .n{color:#FF6B62}
+.steps .human .who{opacity:.75}
+.cmp{overflow-x:auto;margin-top:28px;border:1px solid var(--line);border-radius:18px;background:var(--surface)}
+.cmp table{border-collapse:collapse;width:100%;min-width:680px;font-size:14px;table-layout:fixed}
+.cmp th,.cmp td{padding:12px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+.cmp thead th{font-size:13px;color:var(--muted);font-weight:700}
+.cmp tbody th{font-weight:700}
+.cmp thead th:first-child{width:26%}
+.cmp .me{background:#FFF2EC;color:var(--fg);font-weight:700}
+.cmp thead .me{font-size:15px;font-weight:800;background:var(--accent);color:var(--accent-ink)}
+.cmp tr:last-child th,.cmp tr:last-child td{border-bottom:0}
+.cmp .yes{color:var(--good);font-weight:800}
+.cmp .no{color:var(--muted);font-weight:500}
+.cmp .dots{display:inline-flex;gap:5px;vertical-align:middle}
+.cmp .dots i{width:11px;height:11px;border-radius:50%;border:1.5px solid #9A918A;box-sizing:border-box}
+.cmp .dots i.on{background:#8A817B;border-color:#8A817B}
+.cmp .me .dots i{border-color:var(--accent)}
+.cmp .me .dots i.on{background:var(--accent)}
+.cmp:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:28px}
+.grid4 .card{padding:22px;gap:8px}
+.grid4 h3,.price h3{font-size:18px}
+.log-mock{margin-top:16px;box-shadow:none}
+.price{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:28px}
+.price .card{padding:28px;gap:14px;border-radius:18px}
+.price .main{border:2px solid var(--accent)}
+.price .btn{align-self:flex-start;margin-top:auto}
+.amount{font-size:clamp(32px,4vw,40px);font-weight:800;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
+.amount small{display:block;margin-top:4px;font-size:15px;color:var(--muted);font-weight:600;letter-spacing:0}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.checks li::before{content:"✓";color:var(--accent);font-weight:800;margin-right:8px}
+.flow{list-style:none;margin:0;padding:0;counter-reset:f}
+.flow li{counter-increment:f;display:grid;grid-template-columns:28px 1fr;column-gap:12px;padding-block:10px;border-bottom:1px solid var(--line)}
+.flow li:last-child{border-bottom:0}
+.flow li::before{content:counter(f);grid-row:span 2;width:28px;height:28px;border-radius:50%;background:var(--soft);color:var(--muted);font-weight:700;font-size:13px;display:grid;place-items:center}
+.flow b{font-size:15px}
+.flow span{font-size:13px;color:var(--muted)}
+.log{display:grid;grid-template-columns:48px 1fr;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:13px}
+.log:first-of-type{border-top:0}
+.log time{color:var(--muted);font-variant-numeric:tabular-nums}
+
+figure{margin:0}
+blockquote{margin:0}
+.avatar{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:14px;font-weight:800}
+figcaption{display:flex;align-items:center;gap:12px;font-size:14px;line-height:1.35}
+.proof-band{background:var(--accent-soft);color:var(--fg);border-top:0;padding-block:56px}
+.proof-band figure{display:flex;flex-direction:column;gap:24px;align-items:center;text-align:center}
+.proof-band blockquote{font-size:clamp(24px,3.2vw,36px);font-weight:700;line-height:1.22;letter-spacing:-.015em;max-width:30ch;text-wrap:balance}
+.proof-band figcaption{text-align:left}
+.reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+.review{display:flex;flex-direction:column;gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px}
+.review blockquote{font-size:18px;font-weight:600;line-height:1.35;flex:1}
+.cta{background:var(--soft)}
+form{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;width:100%;max-width:720px;margin-top:8px}
+input{min-width:0;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:14px 18px;font:500 15px var(--font)}
+details{border-bottom:1px solid var(--line);padding-block:16px}
+summary{font-weight:700;cursor:pointer}
+details p{color:var(--muted);margin-top:8px;max-width:70ch}
+footer{padding-block:32px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
+footer .wrap{display:flex;gap:18px;flex-wrap:wrap}
+footer a{color:inherit}
+
+.integr{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:16px;width:100%}
+.integr ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.integr li{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:14px;font-weight:600}
+.integr li small{font-size:12px;font-weight:500;color:var(--muted)}
+
+.client.hl{background:var(--accent-soft);border-radius:10px;border-top-color:transparent;padding-inline:10px;margin-inline:-10px}
+.note{position:relative;width:fit-content;max-width:min(300px,100%);margin:8px -32px 10px auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13px;font-weight:600;line-height:1.35;box-shadow:0 14px 28px -14px rgba(60,20,10,.45)}
+.note::before{content:"";position:absolute;top:-6px;right:32px;width:10px;height:10px;background:var(--surface);border-left:1px solid var(--line);border-top:1px solid var(--line);transform:rotate(45deg)}
+.note.left{margin-left:-32px;margin-right:auto}
+.note.left::before{right:auto;left:44px}
+
+.ask{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.asks{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:8px}
+.asks button{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:14px;padding:10px 14px;font:600 14px var(--font);text-align:left;cursor:pointer}
+.asks button[aria-pressed="true"]{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.asks button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.msg{border-radius:14px;padding:10px 14px;font-size:14px;width:fit-content;max-width:92%}
+.msg.you{margin-left:auto;background:var(--fg);color:var(--bg);font-weight:600}
+.msg.agent{margin-top:10px;background:var(--soft)}
+.src{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;font-size:12px;color:var(--muted);align-items:center}
+.src span{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+.ask-act{display:flex;justify-content:flex-end;margin-top:10px}
+
+.cases{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
+.case{gap:12px;padding:20px}
+.case[hidden]{display:none}
+.case .chip{align-self:flex-start;margin-top:0;background:var(--soft);color:var(--muted)}
+.case h3{font-size:18px}
+.case-line{display:flex;flex-direction:column;gap:2px;font-size:14px;border-top:1px solid var(--line);padding-top:10px}
+.case-line small{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.case-line.human small{color:var(--accent)}
+
+.wa{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:6;display:flex;align-items:center;gap:8px;background:#128C7E;color:#fff;border-radius:999px;padding:14px;font-size:14px;font-weight:700;text-decoration:none;box-shadow:0 12px 28px -10px rgba(0,0,0,.5)}
+.wa svg{width:24px;height:24px;flex:none;fill:currentColor}
+.wa span{display:none}
+.wa.off{visibility:hidden}
+.cmp-hint{display:none}
+@media (hover:hover){
+  .wa:hover,.wa:focus-visible{padding-right:18px}
+  .wa:hover span,.wa:focus-visible span{display:inline}
+}
+
+@media (max-width:900px){
+  .navlinks{display:none}
+  .navbar{justify-content:space-between}
+}
+@media (max-width:820px){
+  .ask{grid-template-columns:1fr;gap:24px}
+  .cases{grid-template-columns:1fr 1fr}
+  .steps{grid-template-columns:1fr 1fr}
+  .reviews,.price{grid-template-columns:1fr}
+  .feature{grid-template-columns:1fr;gap:24px;padding-block:36px}
+  .feature:nth-of-type(even) .copy{order:0}
+}
+@media (max-width:760px){
+  section{padding-block:48px}
+  .client{grid-template-columns:1fr;gap:3px}
+  .chip{margin-top:4px}
+}
+@media (max-width:640px){
+  .row,.grid4{grid-template-columns:1fr}
+  .row{gap:4px}
+  form{grid-template-columns:1fr}
+  .tiles{grid-template-columns:1fr}
+  .tile{display:flex;align-items:center;gap:10px;padding:8px 12px}
+  .tile b{font-size:22px}
+  .note,.note.left{margin-inline:0;max-width:100%}
+  footer{padding-bottom:88px}
+
+  html{scroll-padding-top:72px}
+  .banner{font-size:12px}
+  nav{padding-block:8px}
+  .navbar{gap:8px;padding:6px 6px 6px 14px}
+  .navbar .btn{padding:10px 14px;font-size:13px;min-height:40px}
+  .lead{font-size:17px}
+  .copy p,.review blockquote{font-size:16px}
+  .hero{padding-block:28px 48px}
+  .hero .mock,.mock{padding:14px}
+  .hero .client.extra{display:none}
+
+  input{font-size:16px}
+  .seg button{min-height:40px}
+  .asks button{min-height:44px;width:100%}
+  details{padding-block:8px}
+  summary{padding-block:8px}
+
+  .cases,.reviews{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:16px;margin-inline:-16px;padding:0 16px 8px;scrollbar-width:none}
+  .cases::-webkit-scrollbar,.reviews::-webkit-scrollbar{display:none}
+  .case,.review{flex:0 0 84%;min-width:0;scroll-snap-align:start}
+  .review{padding:20px}
+
+  .cmp-hint{display:block;margin-top:20px}
+  .cmp{margin-top:8px}
+  .cmp table{min-width:640px;font-size:13px}
+  .cmp th,.cmp td{padding:10px}
+  .cmp thead th:first-child{width:112px}
+  .cmp th:first-child{position:sticky;left:0;z-index:1;background:var(--surface);box-shadow:1px 0 0 var(--line)}
+}
+@media (max-width:460px){
+  .steps{grid-template-columns:1fr}
+  .seg{flex-wrap:wrap;border-radius:20px}
+  .seg button{padding:8px 11px}
+}
+@media (max-width:360px){
+  .logo{font-size:0}
+}
+@media (max-width:420px){.split{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<div class="banner"><div class="wrap">Драфт для обсуждения. Заголовки и тексты черновые, на экранах продукта демо-данные</div></div>
+
+<nav aria-label="Основная навигация"><div class="wrap"><div class="navbar">
+  <a class="logo" href="https://moriz.site/"><i></i>Moriz</a>
+  <div class="navlinks"><a href="#features">Что вы видите</a><a href="#cases">Как работает</a><a href="#compare">Сравнение</a><a href="#price">Цена</a><a href="#faq">Вопросы</a></div>
+  <a class="btn btn-main" href="#form">Разобрать мои процессы</a>
+</div></div></nav>
+
+<main>
+<section class="hero"><div class="wrap stack center">
+  <h1>Автоматизация бухгалтерии с ИИ-агентом</h1>
+  <p class="display">Все клиенты, задачи и хвосты <span class="acc">в одном смарт-дашборде</span></p>
+  <p class="lead">По каждому клиенту видно, что сделано, что застряло и кто кого ждёт. Агент сам собирает это из CRM, почты, файлов и выгрузок 1С.</p>
+  <a class="btn btn-main" href="#form">Разобрать мои процессы</a>
+  <p class="caption">30 минут, бесплатно и ни к чему не обязывает</p>
+  <div class="mock" role="img" aria-label="Пример дашборда бухгалтерской фирмы на демо-данных: четыре клиента и статус работы по каждому. Выделен клиент, который два дня ждёт ответа. Для другого клиента напоминание готово и ждёт вашего «да»">
+    <div class="mock-head"><span class="mock-title">Доброе утро, Елена</span><span class="demo">Демо-данные</span></div>
+    <div class="tiles">
+      <div class="tile"><b>7</b><span>клиентов не прислали документы</span></div>
+      <div class="tile"><b>3</b><span>клиента ждут ответа фирмы</span></div>
+      <div class="tile"><b>2</b><span>бухгалтера перегружены</span></div>
+    </div>
+    <div class="client"><b>ТОО «Арман Строй»</b><span>Акт сверки не пришёл, запрос без ответа 6 дней</span><span class="chip wait">Ждём клиента</span></div>
+    <div class="note left">Напоминание готово и ждёт вашего «да»</div>
+    <div class="client hl"><b>ИП Сапарова</b><span>Вопрос по НДС без ответа 2 дня, ведёт Динара</span><span class="chip red">Клиент ждёт нас</span></div>
+    <div class="note">Видно, кто ведёт и сколько клиент ждёт</div>
+    <div class="client extra"><b>ТОО «Береке Трейд»</b><span>Принято 2 из 3 документов, нет выписки</span><span class="chip wait">Ждём клиента</span></div>
+    <div class="client"><b>ТОО «Нур Логистик»</b><span>Декларация 300.00, срок 16 ноября, документы получены</span><span class="chip ok">Можно проверять</span></div>
+  </div>
+  <div class="integr">
+    <p class="caption">Работает поверх того, что у вас уже есть:</p>
+    <ul>
+      <li>1С <small>через выгрузки</small></li>
+      <li>amoCRM</li>
+      <li>Битрикс24</li>
+      <li>Почта</li>
+      <li>Excel</li>
+      <li>Google Таблицы</li>
+      <li>Telegram</li>
+    </ul>
+  </div>
+</div></section>
+
+<section class="proof-band"><div class="wrap">
+  <figure>
+    <blockquote>«Мне очень нравится, что я могу понимать, что у меня по деньгам и по задачам, и при этом никого в команде не дёргать»</blockquote>
+    <figcaption><span class="avatar" aria-hidden="true">АШ</span><span><b>Анна Шамалова</b><br>Собственница бухгалтерской компании, 104 клиента</span></figcaption>
+  </figure>
+</div></section>
+
+<section id="pain"><div class="wrap">
+  <div class="stack">
+    <h2>Взять больше клиентов можно. <span class="acc">Уследить за всеми поможет Moriz</span></h2>
+    <p class="lead">Посмотрите, как те же задачи выглядят сейчас и с Moriz.</p>
+    <div class="seg" role="group" aria-label="Сравнить работу"><button id="w-now" type="button" aria-pressed="true">Как сейчас</button><button id="w-moriz" type="button" aria-pressed="false">С Moriz</button></div>
+  </div>
+  <div class="week" id="week"></div>
+</div></section>
+
+<section id="features"><div class="wrap">
+  <div class="stack">
+    <h2>Вот что делал бы Moriz, <span class="acc">пока вы читаете это</span></h2>
+  </div>
+
+  <article class="feature">
+    <div class="copy">
+      <h3>Собрал статус по каждому клиенту</h3>
+      <p>Статус по клиенту приходится собирать по кусочкам: в почте одно, в таблице другое, остальное помнит бухгалтер лишь частично. Агент делает это за вас: сводит данные из подключённых систем и показывает, что сделано и что застряло.</p>
+    </div>
+    <div class="mock" role="img" aria-label="Демо: статусы работы по клиентам. Выделен клиент, которому не ответили: вопрос висит два дня, ведёт Динара">
+      <div class="mock-head"><span class="mock-title">Клиенты</span><span class="demo">Демо-данные</span></div>
+      <div class="client"><b>ТОО «Арман Строй»</b><span>Нет акта сверки</span><span class="chip wait">Застряло</span></div>
+      <div class="client"><b>ТОО «Береке Трейд»</b><span>Проверка отчёта</span><span class="chip ok">В работе</span></div>
+      <div class="client hl"><b>ИП Сапарова</b><span>Нет ответа клиенту</span><span class="chip red">Горит</span></div>
+      <div class="note">Вопрос висит 2 дня, ведёт Динара</div>
+    </div>
+  </article>
+
+  <article class="feature">
+    <div class="copy">
+      <h3>Отметил, кто кого ждёт</h3>
+      <p>Каждый месяц бухгалтеры вручную напоминают клиентам про одни и те же документы. Moriz ведёт два списка: чего вы ждёте от клиентов и чего они ждут от вас. Напоминание агент готовит сам, а уходит оно только после вашего «да».</p>
+    </div>
+    <div class="mock" role="img" aria-label="Демо: списки «Мы ждём» и «Ждут нас» и черновик напоминания клиенту">
+      <div class="mock-head"><span class="mock-title">Кто кого ждёт</span><span class="demo">Демо-данные</span></div>
+      <div class="split">
+        <div class="col"><strong>Мы ждём</strong><span>Акт сверки, 6 дней</span><span>Выписка, 3 дня</span></div>
+        <div class="col"><strong>Ждут нас</strong><span>Вопрос по НДС, 2 дня</span><span>Счёт на оплату, 1 день</span></div>
+      </div>
+      <div class="draft-msg">Здравствуйте! Напоминаем про акт сверки за III квартал. Пришлите его, пожалуйста, когда будет возможность.<div class="row-end"><span class="fake-btn">Да, отправить</span></div></div>
+    </div>
+  </article>
+
+  <article class="feature">
+    <div class="copy">
+      <h3>Нашёл договорённости с клиентами</h3>
+      <p>Договорённости с клиентом разбросаны по переписке, а часть из них знает только бухгалтер. Если он в отпуске, коллега не знает, где что искать. Агент собирает их из подключённых систем в карточку клиента и показывает, откуда взята каждая.</p>
+    </div>
+    <div class="mock" role="img" aria-label="Демо: карточка клиента с запомненными нюансами и источниками. У каждого нюанса видно, откуда он взят">
+      <div class="mock-head"><span class="mock-title">ТОО «Арман Строй»</span><span class="demo">Демо-данные</span></div>
+      <div class="fact">Акты присылают только в конце месяца<small>Из письма от 21.10</small></div>
+      <div class="note left">Видно, откуда взят каждый нюанс</div>
+      <div class="fact">По выпискам писать бухгалтеру клиента, а не директору<small>Из карточки amoCRM</small></div>
+      <div class="fact">В прошлом квартале вопрос был по форме 300.00<small>Из заметки к проверке</small></div>
+    </div>
+  </article>
+
+  <article class="feature">
+    <div class="copy">
+      <h3>Посчитал нагрузку по бухгалтерам и клиентам</h3>
+      <p>Брать новых клиентов страшно, пока не видно, сколько сил уходит на нынешних. Moriz показывает, кто из бухгалтеров перегружен и какой клиент забирает больше задач, чем платит. Это не слежка за командой: агент снимает с неё обновление статусов.</p>
+    </div>
+    <div class="mock" role="img" aria-label="Демо: нагрузка трёх бухгалтеров в виде полос. Выделена Динара, у неё больше всего задач. Один клиент может забирать больше, чем несколько простых">
+      <div class="mock-head"><span class="mock-title">Нагрузка на этой неделе</span><span class="demo">Демо-данные</span></div>
+      <div class="bar-row"><span>Динара</span><div class="bar"><i class="hot" style="width:92%"></i></div><span>41 задача</span></div>
+      <div class="note">Можно передать часть клиентов коллегам</div>
+      <div class="bar-row"><span>Айгерим</span><div class="bar"><i style="width:58%"></i></div><span>26 задач</span></div>
+      <div class="bar-row"><span>Марат</span><div class="bar"><i style="width:44%"></i></div><span>20 задач</span></div>
+      <div class="draft-msg">Самый затратный клиент: ТОО «Арман Строй», 14 запросов за месяц при базовом тарифе</div>
+      <div class="note left">Один сложный клиент может забирать больше, чем несколько простых</div>
+    </div>
+  </article>
+
+  <div class="mid-cta feat-cta stack center"><a class="btn btn-main" href="#form">Показать на моей фирме</a><p class="caption">Созвон на 30 минут, бесплатно: разберём ваши процессы</p></div>
+  </div></section>
+
+<section id="cases" class="tinted"><div class="wrap">
+  <div class="stack">
+    <h2>Посмотрите, <span class="acc">как работает агент</span></h2>
+    <div class="seg" id="case-filter" role="group" aria-label="Показать задачи по теме">
+      <button type="button" data-f="docs" aria-pressed="true">Документы</button>
+      <button type="button" data-f="clients" aria-pressed="false">Клиенты</button>
+      <button type="button" data-f="load" aria-pressed="false">Нагрузка</button>
+    </div>
+  </div>
+  <div class="cases">
+    <article class="card case" data-t="docs"><h3>Клиент неделю не присылает документы</h3>
+      <div class="case-line"><small>Агент</small>Замечает запрос без ответа и готовит напоминание</div>
+      <div class="case-line human"><small>Вы</small>Говорите «да», и напоминание уходит</div></article>
+    <article class="card case" data-t="docs"><h3>В комплекте не хватает одного документа</h3>
+      <div class="case-line"><small>Агент</small>Показывает, что прислали и чего нет: 2 из 3, нет выписки</div>
+      <div class="case-line human"><small>Вы</small>Решаете, запросить самим или поручить бухгалтеру</div></article>
+    <article class="card case" data-t="docs"><h3>Отчётный период, а документы ещё не у всех</h3>
+      <div class="case-line"><small>Агент</small>Показывает, кто не прислал документы и у кого срок на этой неделе</div>
+      <div class="case-line human"><small>Вы</small>Выбираете, кому отправить напоминания</div></article>
+    <article class="card case" data-t="clients"><h3>Клиенту забыли ответить</h3>
+      <div class="case-line"><small>Агент</small>Добавляет вопрос в список «Ждут нас» и показывает, кто за него отвечает</div>
+      <div class="case-line human"><small>Вы</small>Напоминаете бухгалтеру или отвечаете сами</div></article>
+    <article class="card case" data-t="clients"><h3>Клиент звонит вам и спрашивает, что с его вопросом</h3>
+      <div class="case-line"><small>Агент</small>Показывает статус по клиенту и кто его ведёт</div>
+      <div class="case-line human"><small>Вы</small>Отвечаете сразу, не дёргая бухгалтера</div></article>
+    <article class="card case" data-t="clients"><h3>Бухгалтер уходит в отпуск и передаёт дела</h3>
+      <div class="case-line"><small>Агент</small>Показывает договорённости с клиентами и откуда взята каждая</div>
+      <div class="case-line human"><small>Вы</small>Решаете, кого из клиентов передать коллеге</div></article>
+    <article class="card case" data-t="load"><h3>Один бухгалтер не успевает, другие свободнее</h3>
+      <div class="case-line"><small>Агент</small>Показывает задачи и запросы по каждому бухгалтеру</div>
+      <div class="case-line human"><small>Вы</small>Передаёте часть клиентов тому, кто свободнее</div></article>
+    <article class="card case" data-t="load"><h3>Пришёл новый клиент, и непонятно, кому его отдать</h3>
+      <div class="case-line"><small>Агент</small>Показывает, у кого из бухгалтеров есть запас по задачам</div>
+      <div class="case-line human"><small>Вы</small>Назначаете бухгалтера</div></article>
+    <article class="card case" data-t="load"><h3>Клиент забирает больше, чем платит</h3>
+      <div class="case-line"><small>Агент</small>Показывает, сколько задач и запросов приходится на клиента</div>
+      <div class="case-line human"><small>Вы</small>Решаете, пора ли пересмотреть цену</div></article>
+  </div>
+</div></section>
+
+<section id="ask"><div class="wrap"><div class="ask">
+  <div class="copy">
+    <h2>Спросите <span class="acc">обычным языком</span></h2>
+    <p>Агент отвечает по подключённым системам и показывает, откуда взял ответ. Например, можно спросить так:</p>
+    <div class="asks" id="asks" role="group" aria-label="Примеры вопросов агенту"></div>
+  </div>
+  <div class="mock">
+    <div class="mock-head"><span class="mock-title">Вопрос агенту</span><span class="demo">Демо-данные</span></div>
+    <div id="ask-chat" aria-live="polite"></div>
+  </div>
+</div></div></section>
+
+<section id="compare" class="tinted"><div class="wrap">
+  <div class="stack">
+    <h2>Таблица помнит то, что в неё внесли. <span class="acc">Moriz — то, что внести забыли</span></h2>
+    <p class="lead">Те же задачи, разные инструменты. Сравните, кто делает работу в каждом случае.</p>
+  </div>
+  <p class="caption cmp-hint">Листайте таблицу вправо, Moriz в последней колонке</p>
+  <div class="cmp" role="region" aria-label="Сравнение Moriz с другими способами вести клиентов" tabindex="0">
+    <table>
+      <thead><tr><th scope="col"><span class="sr">Что сравниваем</span></th><th scope="col">Таблицы и чаты</th><th scope="col">Сервис отчётности</th><th scope="col">CRM, трекеры и конструкторы</th><th scope="col" class="me">Moriz</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Кто собирает статусы</th><td>Команда</td><td>Бухгалтеры</td><td>Команда</td><td class="me">Агент сам</td></tr>
+        <tr><th scope="row">Делает за вас</th><td><span class="dots" role="img" aria-label="1 из 5"><i class="on"></i><i></i><i></i><i></i><i></i></span></td><td><span class="dots" role="img" aria-label="2 из 5"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span></td><td><span class="dots" role="img" aria-label="2 из 5"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span></td><td class="me"><span class="dots" role="img" aria-label="5 из 5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></td></tr>
+        <tr><th scope="row">Сам видит, кто кого ждёт по документам</th><td class="no" aria-label="нет">✗</td><td class="no" aria-label="нет">✗</td><td class="no" aria-label="нет">✗</td><td class="me"><span class="yes" aria-label="да">✓</span></td></tr>
+        <tr><th scope="row">Помнит договорённости из переписки</th><td class="no" aria-label="нет">✗</td><td class="no" aria-label="нет">✗</td><td class="no" aria-label="нет">✗</td><td class="me"><span class="yes" aria-label="да">✓</span></td></tr>
+        <tr><th scope="row">Без переезда в новую систему</th><td><span class="yes" aria-label="да">✓</span></td><td><span class="yes" aria-label="да">✓</span></td><td class="no" aria-label="нет">✗</td><td class="me"><span class="yes" aria-label="да">✓</span></td></tr>
+        <tr><th scope="row">Цена</th><td>Часы команды</td><td>Подписка и время команды</td><td>Лицензии и доработки</td><td class="me">Одна подписка</td></tr>
+        <tr><th scope="row">Подходит, когда</th><td>Мало клиентов и вопросов</td><td>Нужно сдать отчёт</td><td>Есть время вести учёт</td><td class="me">Нет времени ни на что из этого</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="cmp-cta"><a class="link-cta" href="#form">Посмотреть Moriz в деле <span aria-hidden="true">→</span></a></div>
+</div></section>
+
+<section id="reviews"><div class="wrap">
+  <h2>Что говорят <span class="acc">руководители</span></h2>
+  <div class="reviews">
+    <figure class="review">
+      <blockquote>«Видеть, сколько задач на этой неделе у каждого бухгалтера, — это очень понятно. Я сама примерно знаю, кто чем занят, а тут всё перед глазами»</blockquote>
+      <figcaption><span class="avatar" aria-hidden="true">АШ</span><span><b>Анна Шамалова</b><br>Собственница бухгалтерской компании, 104 клиента</span></figcaption>
+      <p class="caption">Собрали для Анны пример панели</p>
+    </figure>
+    <figure class="review">
+      <blockquote>«Бывает, тендерная процедура проскакивает: прошла, а мы в ней не участвовали»</blockquote>
+      <figcaption><span class="avatar" aria-hidden="true">И</span><span><b>Ирина</b><br>Руководитель, поставщик техники для ЖКХ и аэропортов</span></figcaption>
+      <p class="caption">Собрали для Ирины тендерную панель</p>
+    </figure>
+    <figure class="review">
+      <blockquote>«Я всем говорю: держите контакт с клиентом, ставьте повторные звонки и напоминания. Но вижу, что системно это пока не работает»</blockquote>
+      <figcaption><span class="avatar" aria-hidden="true">Д</span><span><b>Денис</b><br>Директор, поставщик электрооборудования</span></figcaption>
+      <p class="caption">Собрали для Дениса панель продаж</p>
+    </figure>
+  </div>
+  <p class="caption" style="margin-top:16px">Цитаты из интервью, сокращены без изменения смысла. Публикуются с согласия</p>
+</div></section>
+
+<section id="security" class="tinted"><div class="wrap">
+  <h2>Без вашего «да» <span class="acc">Moriz ничего не меняет</span></h2>
+  <p class="lead" style="margin-top:12px">Правила задаёт компания, доступ по ролям, каждое действие в журнале.</p>
+  <div class="grid4">
+    <div class="card"><h3>Работает в браузере и на телефоне</h3><p>VPN и отдельные программы не нужны</p></div>
+    <div class="card"><h3>Данные на серверах Moriz</h3><p>Резервные копии каждый день</p></div>
+    <div class="card"><h3>Доступ по ролям</h3><p>Каждый видит только то, что разрешено его роли</p></div>
+    <div class="card"><h3>Пароли скрыты</h3><p>Логины и пароли из файлов и переписки Moriz не видит и не использует</p></div>
+  </div>
+  <div class="mock log-mock" role="img" aria-label="Демо: журнал действий агента">
+    <div class="mock-head"><span class="mock-title">Журнал действий</span><span class="demo">Демо-данные</span></div>
+    <div class="log"><time>09:12</time><span>Агент подготовил напоминание для ТОО «Береке Трейд»</span></div>
+    <div class="log"><time>09:40</time><span>Елена проверила и нажала «да»</span></div>
+    <div class="log"><time>09:41</time><span>Письмо отправлено клиенту</span></div>
+  </div>
+</div></section>
+
+<section id="start"><div class="wrap">
+  <h2>Один созвон — <span class="acc">и дальше настраиваем сами</span></h2>
+  <p class="lead" style="margin-top:12px">Найдите полчаса на разговор, а подключение и настройку мы берём на себя.</p>
+  <div class="steps">
+    <div class="card"><span class="n">Разбор, полчаса</span><span>Выясняем, откуда вы берёте статусы и где зависают документы</span></div>
+    <div class="card"><span class="n">Дашборд на ваших данных</span><span>Собираем по выгрузке ещё до подключения систем</span></div>
+    <div class="card"><span class="n">Подключение</span><span>Подключаем amoCRM, почту, файлы и выгрузки 1С, согласуем доступы</span></div>
+    <div class="card"><span class="n">Работа команды</span><span>Бухгалтеры работают как обычно. Запускаем примерно за 2 недели после разбора, результат видно на второй месяц</span></div>
+  </div>
+</div></section>
+
+<section id="price" class="tinted"><div class="wrap">
+  <div class="stack">
+    <h2>Подписка, <span class="acc">в которой всё уже есть</span></h2>
+    <p class="lead">Без доплат за модули и лишние лицензии.</p>
+  </div>
+  <div class="price">
+    <div class="card main">
+      <span class="caption">Подписка</span>
+      <div class="amount">от&nbsp;41&#8239;900&nbsp;₸ <small>в месяц при оплате за год</small></div>
+      <ul class="checks">
+        <li>Смарт-дашборд и ИИ-агент</li>
+        <li>Подключение ваших систем бесплатно</li>
+        <li>Настройку под ваш процесс делаем мы</li>
+        <li>Без минимального числа пользователей</li>
+      </ul>
+      <a class="btn btn-main" href="#form">Рассчитать стоимость</a>
+    </div>
+    <div class="card">
+      <span class="caption">Перед покупкой</span>
+      <h3>Дашборд на вашей выгрузке</h3>
+      <p>Соберём его по выгрузке из ваших систем и покажем до оплаты.</p>
+      <ol class="flow">
+        <li><b>Разбор процессов</b><span>Бесплатно, около 30 минут</span></li>
+        <li><b>Дашборд на ваших данных</b><span>Собираем по выгрузке</span></li>
+        <li><b>Решение о покупке</b><span>Когда увидели результат</span></li>
+      </ol>
+    </div>
+  </div>
+</div></section>
+
+<section id="form" class="cta"><div class="wrap stack center">
+  <h2>Вы долистали до конца. <span class="acc">Давайте созвонимся</span></h2>
+  <p class="lead">За полчаса разберём ваш процесс и покажем, что будет видно каждое утро. Потом можем собрать дашборд на вашей выгрузке, ещё до оплаты.</p>
+  <form id="lead">
+    <input id="f-name" name="name" autocomplete="name" placeholder="Имя" aria-label="Имя">
+    <input id="f-contact" name="contact" placeholder="Телефон или Telegram" aria-label="Телефон или Telegram">
+    <button class="btn btn-main" type="submit">Разобрать мои процессы</button>
+  </form>
+  <p class="caption" id="f-note" aria-live="polite">Напишем в течение рабочего дня, один раз и по делу</p>
+</div></section>
+
+<section id="faq"><div class="wrap">
+  <h2>Частые вопросы</h2>
+  <div style="margin-top:16px">
+    <details open><summary>Что такое автоматизация бухгалтерии с ИИ-агентом?</summary><p>Это когда ИИ-агент сам собирает статусы и договорённости из систем, где уже работает фирма: amoCRM, почты, файлов и выгрузок 1С. Каждое утро видно, чьи документы зависли, кому не ответили и кто перегружен. Moriz не сдаёт отчётность и не заменяет 1С, а клиенту пишет только после вашего «да».</p></details>
+    <details><summary>Нужно ли менять 1С или amoCRM?</summary><p>Нет. Moriz работает поверх систем, которые у вас уже есть. 1С подключается только через выгрузки.</p></details>
+    <details><summary>Какие системы можно подключить?</summary><p>amoCRM, Битрикс24, МойСклад, Google Таблицы, Excel, почту, Telegram и сервисы с открытым API. 1С подключается через выгрузки. Новую интеграцию оцениваем отдельно.</p></details>
+    <details><summary>Чем это отличается от сервиса отчётности и CRM?</summary><p>Сервис отчётности помогает сдавать отчёты и следить за их сроками, а CRM хранит то, что в неё внесли. Moriz собирает картину вокруг этой работы: какие документы зависли, кому не ответили и кто перегружен.</p></details>
+    <details><summary>Откуда агент берёт данные и чего он не видит?</summary><p>Из подключённых систем: amoCRM, почты, файлов и выгрузок 1С. Устные договорённости и каналы, которые не подключены, он не видит.</p></details>
+    <details><summary>Что с паролями и данными клиентов?</summary><p>Логины и пароли из файлов и переписки Moriz не видит и не использует. Каждый сотрудник видит только то, что открыто по правам. Данные хранятся на серверах Moriz, резервные копии делаются каждый день.</p></details>
+    <details><summary>Может ли агент сам написать клиенту?</summary><p>Только после вашего «да». Агент готовит черновик, а вы смотрите его и решаете, отправлять ли.</p></details>
+    <details><summary>Сколько это стоит и как быстро запустимся?</summary><p>Подписка от 41 900 ₸ в месяц при оплате за год, подключение бесплатное. Запускаем примерно за 2 недели после разбора процесса, результат видно на второй месяц.</p></details>
+    <details><summary>Кому Moriz не подойдёт?</summary><p>Moriz не сдаёт отчётность, не распознаёт первичку и не заменяет 1С. Если нужна именно учётная программа, это не наш продукт. Больше всего он полезен фирмам, где несколько бухгалтеров ведут много клиентов.</p></details>
+  </div>
+</div></section>
+
+</main>
+
+<footer><div class="wrap">
+  <span>Moriz · драфт лендинга для бухгалтерии</span>
+  <a href="https://moriz.site/">Главная</a>
+  <a href="#">Политика конфиденциальности</a>
+</div></footer>
+
+<!-- Драфт: номера WhatsApp пока нет, кнопка ведёт к форме. Заменить href на https://wa.me/<номер>?text=Здравствуйте!%20Пишу%20со%20страницы%20для%20бухгалтерских%20фирм -->
+<a class="wa" href="#form" aria-label="Написать в WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg><span>Написать в WhatsApp</span></a>
+
+<script>
+const rows=[
+  ['Узнать статус по клиенту','Идёте спрашивать бухгалтера','Открываете смарт-дашборд, и статус уже там'],
+  ['Проверить, кто прислал документы','Открываете таблицу и сверяете по каждому клиенту','Видно, кто не прислал, в одном списке'],
+  ['Заметить, что запрос документов завис','Часто узнаёте, когда уже горит','Зависшие запросы видно сразу, а напоминание уходит после вашего «да»'],
+  ['Заметить, что клиенту не ответили','Клиент пишет сам и спрашивает, что с его вопросом','Вопрос попадает в список «Ждут нас», и видно, кто за него отвечает'],
+  ['Вспомнить нюанс клиента','Ищете в переписке или спрашиваете коллег','Нюанс в карточке клиента, рядом его источник'],
+  ['Понять, кто перегружен','Замечаете по сорванным срокам','Нагрузка видна по каждому бухгалтеру и клиенту']
+];
+const week=document.getElementById('week');
+function renderWeek(withMoriz){
+  week.classList.toggle('moriz',withMoriz);
+  week.innerHTML=rows.map(r=>'<div class="row"><b>'+r[0]+'</b><span>'+(withMoriz?r[2]:r[1])+'</span></div>').join('');
+  document.getElementById('w-now').setAttribute('aria-pressed',!withMoriz);
+  document.getElementById('w-moriz').setAttribute('aria-pressed',withMoriz);
+}
+document.getElementById('w-now').onclick=()=>renderWeek(false);
+document.getElementById('w-moriz').onclick=()=>renderWeek(true);
+renderWeek(false);
+
+const asks=[
+  {q:'Что по ТОО «Арман Строй»?',a:'Ждём от них акт сверки за III квартал: запрос ушёл 6 дней назад, ответа пока нет. Акты они обычно присылают в конце месяца. Напоминание готово, отправить?',src:['Письмо с запросом','Письмо от 21.10'],act:'Да, отправить'},
+  {q:'Что мы обещали ТОО «Береке Трейд»?',a:'В сентябре договорились, что выписки они присылают до 5-го числа, а сверку раз в квартал. Ещё в октябре мы обещали проверить их договор с поставщиком, это пока не сделано.',src:['Письмо от 12.09','Карточка amoCRM']},
+  {q:'Кто перегружен на этой неделе?',a:'Больше всего задач у Динары: 41. У Айгерим 26, у Марата 20. Чаще всех пишет ТОО «Арман Строй»: 14 запросов за месяц.',src:['Задачи в amoCRM','Почта']},
+  {q:'Что важно передать на время отпуска Динары?',a:'Открыт вопрос ИП Сапаровой по НДС. По ТОО «Арман Строй» о выписках пишут бухгалтеру клиента, а не директору.',src:['Почта','Карточка amoCRM']}
+];
+const asksBox=document.getElementById('asks');
+asksBox.innerHTML=asks.map((x,i)=>'<button type="button" data-i="'+i+'" aria-pressed="false">'+x.q+'</button>').join('');
+function renderAsk(i){
+  const x=asks[i];
+  document.getElementById('ask-chat').innerHTML='<div class="msg you">'+x.q+'</div><div class="msg agent">'+x.a+'<div class="src">Источники: '+x.src.map(s=>'<span>'+s+'</span>').join('')+'</div></div>'+(x.act?'<div class="ask-act"><span class="fake-btn">'+x.act+'</span></div>':'');
+  asksBox.querySelectorAll('button').forEach((b,n)=>b.setAttribute('aria-pressed',n===i));
+}
+asksBox.querySelectorAll('button').forEach((b,i)=>b.onclick=()=>renderAsk(i));
+renderAsk(0);
+
+const caseBtns=document.querySelectorAll('#case-filter button');
+caseBtns.forEach(b=>b.onclick=()=>{
+  caseBtns.forEach(o=>o.setAttribute('aria-pressed',o===b));
+  document.querySelectorAll('.case').forEach(c=>{c.hidden=c.dataset.t!==b.dataset.f;});
+  document.querySelector('.cases').scrollLeft=0;
+});
+caseBtns[0].click();
+
+const waBtn=document.querySelector('.wa');
+if('IntersectionObserver' in window){
+  new IntersectionObserver(e=>waBtn.classList.toggle('off',e[0].isIntersecting)).observe(document.getElementById('form'));
+}
+
+document.getElementById('lead').addEventListener('submit',function(e){
+  e.preventDefault();
+  document.getElementById('f-note').textContent='Это драфт, заявка не отправляется.';
+});
+</script>
+</body>
+</html>
